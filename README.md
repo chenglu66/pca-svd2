@@ -165,4 +165,5 @@ def recommend(datamat,user,N=3,simMeas=cosrelation,estMethod=standEst):
         estimatedScore = estMethod(datamat, user, simMeas, item)
         itemScores.append((item, estimatedScore))
     return sorted(itemScores, key=lambda jj: jj[1], reverse=True)[:N] 
-
+每一行对应一篇文章，每一列对应一个词。
+三个矩阵有非常清楚的物理含义。第一个矩阵X中的每一行表示意思相关的一类词，其中的每个非零元素表示这类词中每个词的重要性（或者说相关性），数值越大越相关。最后一个矩阵Y中的每一列表示同一主题一类文章，其中每个元素表示这类文章中每篇文章的相关性。中间的矩阵则表示类词和文章雷之间的相关性。因此，我们只要对关联矩阵A进行一次奇异值分解，w 我们就可以同时完成了近义词分类和文章的分类。（同时得到每类文章和每类词的相关性）。
