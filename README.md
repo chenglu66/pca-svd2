@@ -109,5 +109,35 @@ def main():<br />
 if __name__=='__main__':<br />
     main()<br />
 现在可以计算相似度了，那么推荐系统怎么做呢，我是基于用户还是物品，数据少都差不多，只是高维才会差别，不过我喜欢基于用户，而不是基于内容，这里还是基于物品吧。因为整个相似度都是列向量的计算。
+根据用户的评价来衡量物品性，就要找到同时对该物品评价的用户，<br />
+到底怎么判断呢？假设我是基于物品相似度来推荐，我把这个物品和我以前评价过的物品相比较，然后用以前的评价来估计这次的评价，下面就是根据别的用户评价来评估两个物品的相似度。
+下面开始码代码
+def standEst(datamat,user,simmeans,item):
+    n=shape(datamat)[1]
+    simtotal=0.0;ratsimtotal=0.0
+    for j in range(n):
+        userrating[user,j]=0
+        if userrating==0:
+            continue
+        overlap=nonzero(logical_and(datamat[:,item].A>0,datamat[:,j].A>0))[0]
+        if len(overlap)==0:
+            similartity=0
+        else:
+            similartity=simmeans(datamat[overlap,item],datamat[overlap,j])
+            print(similartity)
+        simtotal+=similartity
+        ratsimtotal+=simlarity*userrating
+        if simtotal==0:
+            return 0
+        else:
+            return ratsimtotal/simtotal
+ 而SVD与其不同的是我用一部分的奇异值来重构元数据，这样必须知道SVD每一部分代表什么意思：
+ 在主成分分析（PCA）原理总结中，我们讲到要用PCA降维，需要找到样本协方差矩阵$X^TX$的最大的d个特征向量，然后用这最大的d个特征向量张成的矩阵来做低维投影降维。可以看出，在这个过程中需要先求出协方差矩阵$X^TX$，当样本数多样本特征数也多的时候，这个计算量是很大的。
 
+　　　　注意到我们的SVD也可以得到协方差矩阵$X^TX$最大的d个特征向量张成的矩阵，但是SVD有个好处，有一些SVD的实现算法可以不求先求出协方差矩阵$X^TX$，也能求出我们的右奇异矩阵$V$。也就是说，我们的PCA算法可以不用做特征分解，而是做SVD来完成。这个方法在样本量很大的时候很有效。实际上，scikit-learn的PCA算法的背后真正的实现就是用的SVD，而不是我们我们认为的暴力特征分解。
 
+　　　　另一方面，注意到PCA仅仅使用了我们SVD的右奇异矩阵，没有使用左奇异矩阵，那么左奇异矩阵有什么用呢？
+
+　　　　假设我们的样本是$m \times n$的矩阵X，如果我们通过SVD找到了矩阵$XX^T$最大的d个特征向量张成的$m \times d$维矩阵U，则我们如果进行如下处理：$$X'_{d \times n} = U_{d \times m}^TX_{m \times n}$$
+
+　　　　可以得到一个$d \times n$的矩阵X‘,这个矩阵和我们原来的$m \times n$维样本矩阵X相比，行数从m减到了k，可见对行数进行了压缩。也就是说，左奇异矩阵可以用于行数的压缩。相对的，右奇异矩阵可以用于列数即特征维度的压缩，也就是我们的PCA降维。　　　　
