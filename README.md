@@ -51,46 +51,46 @@ if __name__=='__main__':<br />
 对于一般的矩阵，我想保留主要信息，直接操作原矩阵，还是想象成波形，能量小的波形对结果影响也比较小，因此直接做分解得到能量大小，从特征值定义我们知道特征向量是方向，而特征值是大小，因此特征值小的就是能量小。所以同PCA来比，SVD没有使用方差，而直接使用原数据忽略掉一些能量比较小的点，这也意味着在稀疏矩阵比较有用。并且SVD出来的矩阵奇异值与特征值类似，只不过特征值只有伸缩而没有选择变换。这样就ok了。实际效果上应该是SVD好一点。
 上代码：<br />
 主要是计算相似性上的区别吧。而相似性一般而言最好的是余弦相似，和皮尔逊相关系数。<br />
-先上这代码
-from numpy import *
-#cos度量方式
-data=[[0, 0, 0, 2, 2],
-           [0, 0, 0, 3, 3],
-           [0, 0, 0, 1, 1],
-           [1, 1, 1, 0, 0],
-           [2, 2, 2, 0, 0],
-           [5, 5, 5, 0, 0],
-           [1, 1, 1, 0, 0]]
-A=mat(data)[:,0]
-B=mat(data)[:,4]
-def cosrelation(A,B):
-    num = float(A.T*B)
-    denom = la.norm(A)*la.norm(B)
-    #把相似度确定在0-1之间
-    return 0.5+0.5*(num/denom)
-#欧式距离度量方式
-def ecludSim(inA,inB):
-    return 1.0/(1.0 + la.norm(inA - inB))
-#皮尔逊相关稀疏
-def pi(x,y):
-    xmean=mean(x,axis=0)
-    ymean=mean(y,axis=0)
+先上这代码<br />
+from numpy import *<br />
+#cos度量方式<br />
+data=[[0, 0, 0, 2, 2],<br />
+           [0, 0, 0, 3, 3],<br />
+           [0, 0, 0, 1, 1],<br />
+           [1, 1, 1, 0, 0],<br />
+           [2, 2, 2, 0, 0],<br />
+           [5, 5, 5, 0, 0],<br />
+           [1, 1, 1, 0, 0]]<br />
+A=mat(data)[:,0]<br />
+B=mat(data)[:,4]<br />
+def cosrelation(A,B):<br />
+    num = float(A.T*B)<br />
+    denom = la.norm(A)*la.norm(B)<br />
+    #把相似度确定在0-1之间<br />
+    return 0.5+0.5*(num/denom)<br />
+#欧式距离度量方式<br />
+def ecludSim(inA,inB):<br />
+    return 1.0/(1.0 + la.norm(inA - inB))<br />
+#皮尔逊相关稀疏<br />
+def pi(x,y):<br />
+    xmean=mean(x,axis=0)<br />
+    ymean=mean(y,axis=0)<br />
     xvar=dot((x-xmean).T,(x-xmean))
-    print(xvar)
-    print(cov(x,rowvar = 0)*6)
+    print(xvar)<br />
+    print(cov(x,rowvar = 0)*6)<br />
     covxy=dot((x-xmean).T,y-ymean)
     xvar=dot((x-xmean).T,x-xmean)
     yvar=dot((y-ymean).T,y-ymean)
-    p=covxy/sqrt(xvar*yvar)
-    print(cov(x,y,rowvar = 0))
+    p=covxy/sqrt(xvar*yvar)<br />
+    print(cov(x,y,rowvar = 0))<br />
     print(covxy)
     p=0.5+0.5*(p)
-    score1=0.5+0.5*corrcoef(A, B, rowvar = 0)[0][1]
+    score1=0.5+0.5*corrcoef(A, B, rowvar = 0)[0][1]<br />
     print(float(p))
     print(score1)
-'''
-def pi(A,B):
-    denom = la.norm(A)*la.norm(B)
+'''<br />
+def pi(A,B):<br />
+    denom = la.norm(A)*la.norm(B)<br />
     h=cov(A,B,rowvar=0)
     print(mat(h))
     print(corrcoef(A, B, rowvar = 0))
@@ -98,16 +98,16 @@ def pi(A,B):
     print(score)
     score1=0.5+0.5*corrcoef(A, B, rowvar = 0)[0][1]
     print(score1)
-'''
-def main():
+'''<br />
+def main():<br />
     #pca(datamat,nums=3)#误差29
     score0=cosrelation(A,B)
     print(score0)
     score3=ecludSim(A,B)
     print(score3)
-    pi(A,B)
-if __name__=='__main__':
-    main()
+    pi(A,B)<br />
+if __name__=='__main__':<br />
+    main()<br />
 现在可以计算相似度了，那么推荐系统怎么做呢，我是基于用户还是物品，数据少都差不多，只是高维才会差别，不过我喜欢基于用户，而不是基于内容，这里还是基于物品吧。因为整个相似度都是列向量的计算。
 
 
