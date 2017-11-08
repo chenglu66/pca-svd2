@@ -46,6 +46,7 @@ def main():<br />
     pca(datamat,nums=7)#误差0.73136<br />
 if __name__=='__main__':<br />
     main()<br />
+    
 #ok图不放了，下面看主要内容基于SVD的餐馆推荐系统设计<br />
 #首先介绍下SVD算法。<br />
 对于一般的矩阵，我想保留主要信息，直接操作原矩阵，还是想象成波形，能量小的波形对结果影响也比较小，因此直接做分解得到能量大小，从特征值定义我们知道特征向量是方向，而特征值是大小，因此特征值小的就是能量小。所以同PCA来比，SVD没有使用方差，而直接使用原数据忽略掉一些能量比较小的点，这也意味着在稀疏矩阵比较有用。并且SVD出来的矩阵奇异值与特征值类似，只不过特征值只有伸缩而没有选择变换。这样就ok了。实际效果上应该是SVD好一点。
@@ -157,8 +158,7 @@ def svdEst(dataMat, user, simMeas, item):
         ratSimTotal += similarity * userRating
     if simTotal == 0: return 0
     else: return ratSimTotal/simTotal
-            
-            
+                      
 def recommend(datamat,user,N=3,simMeas=cosrelation,estMethod=standEst):
     unratedItems = nonzero(datamat[user,:].A==0)[1]#find unrated items 
     if len(unratedItems) == 0: return ('you rated everything')
@@ -168,4 +168,4 @@ def recommend(datamat,user,N=3,simMeas=cosrelation,estMethod=standEst):
         itemScores.append((item, estimatedScore))
     return sorted(itemScores, key=lambda jj: jj[1], reverse=True)[:N] 
 每一行对应一篇文章，每一列对应一个词。
-三个矩阵有非常清楚的物理含义。第一个矩阵X中的每一行表示意思相关的一类词，其中的每个非零元素表示这类词中每个词的重要性（或者说相关性），数值越大越相关。最后一个矩阵Y中的每一列表示同一主题一类文章，其中每个元素表示这类文章中每篇文章的相关性。中间的矩阵则表示类词和文章雷之间的相关性。因此，我们只要对关联矩阵A进行一次奇异值分解，w 我们就可以同时完成了近义词分类和文章的分类。（同时得到每类文章和每类词的相关性）。
+三个矩阵有非常清楚的物理含义。第一个矩阵X中的每一行表示意思相关的一类词，其中的每个非零元素表示这类词中每个词的重要性（或者说相关性），数值越大越相关。最后一个矩阵Y中的每一列表示同一主题一类文章，其中每个元素表示这类文章中每篇文章的相关性。中间的矩阵则表示类词和文章雷之间的相关性。因此，我们只要对关联矩阵A进行一次奇异值分解，w 我们就可以同时完成了近义词分类和文章的分类。（同时得到每类文章和每类词的相关性）。这里也解释了为什么要除以奇异值。
